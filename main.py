@@ -9,9 +9,6 @@ Base = declarative_base()
 
 
 class MainMenu:
-    """
-    Main menu for the application
-    """
     text = "MAIN MENU\n0 Exit\n1 CRUD operations\n2 Show top ten companies by criteria\nEnter an option:"
 
     def __init__(self, sql_engine):
@@ -24,10 +21,6 @@ class MainMenu:
         self.engine = sql_engine
 
     def display(self):
-        """
-        Display the main menu. Loop until the user wants to quit.
-        :return:
-        """
         while not self.should_exit:
             print(self.text)
             choice = input()
@@ -50,9 +43,6 @@ class MainMenu:
 
 
 class CrudMenu(MainMenu):
-    """
-    Menu for the CRUD operations.
-    """
     text = ("CRUD MENU\n0 Back\n1 Create a company\n2 Read a company\n3 Update a company\n4 Delete a company\n5 List "
             "all companies\n\nEnter an option:")
 
@@ -265,10 +255,6 @@ class ShowTopTenMenu(MainMenu):
         self.should_exit = True
 
     def list_by_ndebitda(self):
-        """
-        Display top ten companies by ND/EBITDA. (ND/EBITDA = NET_DEBT / EBITDA).
-        :return:
-        """
         Session = sessionmaker(bind=self.engine)
         session = Session()
         companies = session.query(Financial).order_by(Financial.net_debt / Financial.ebitda).all()
@@ -281,10 +267,6 @@ class ShowTopTenMenu(MainMenu):
         self.back()
 
     def list_by_roe(self):
-        """
-        Display top ten companies by ROE. (ROE = NET_PROFIT / EQUITY).
-        :return:
-        """
         Session = sessionmaker(bind=self.engine)
         session = Session()
         companies = session.query(Financial).order_by(Financial.net_profit / Financial.equity).all()
@@ -297,10 +279,6 @@ class ShowTopTenMenu(MainMenu):
         self.back()
 
     def list_by_roa(self):
-        """
-        Display top ten companies by ROA. (ROA = NET_PROFIT / ASSETS).
-        :return:
-        """
         Session = sessionmaker(bind=self.engine)
         session = Session()
         companies = session.query(Financial).order_by(Financial.net_profit / Financial.assets).all()
@@ -332,6 +310,13 @@ class Financial(Base):
     equity = Column(Float)
     cash_equivalents = Column(Float)
     liabilities = Column(Float)
+
+
+def load_data(csv_file, **columns):
+    with open(csv_file, "r", newline="") as csv_file:
+        reader = csv.DictReader(csv_file, delimiter=",")
+        for row in reader:
+            yield {column: row[column] for column in columns}
 
 
 if __name__ == '__main__':
